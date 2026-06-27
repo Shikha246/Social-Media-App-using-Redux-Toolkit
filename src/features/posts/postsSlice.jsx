@@ -1,28 +1,40 @@
-import {createSlice} from "@reduxjs/toolkit";
+import {createSlice, createAsyncThunk} from "@reduxjs/toolkit";
+import axios from "axios";
+
+export const fetchPosts = createAsyncThunk("posts/fetchPosts", async ()=>{
+    const response = await axios.get("https://social-media-cw-server-student-neog.replit.app/posts")
+    console.log(response);
+    return response.data;
+})
+
+
+
 
 export const postSlice = createSlice({
     name: 'posts',
     initialState:{
         posts:[
-            {
-                postId: "P001",
-                caption:"Learning Redux Toolkit",
-                likes:22,
-                user:{
-                    userId: "u123",
-                    name:"John Doe"
-                }
-            },
-            {
-                postId: "P002",
-                caption:"It is fun to learn Redux Toolkit",
-                likes:18,
-                user:{
-                    userId: "u123",
-                    name:"John Doe"
-                }
-            }
-        ]
+            // {
+            //     postId: "P001",
+            //     caption:"Learning Redux Toolkit",
+            //     likes:22,
+            //     user:{
+            //         userId: "u123",
+            //         name:"John Doe"
+            //     }
+            // },
+            // {
+            //     postId: "P002",
+            //     caption:"It is fun to learn Redux Toolkit",
+            //     likes:18,
+            //     user:{
+            //         userId: "u123",
+            //         name:"John Doe"
+            //     }
+            // }
+        ],
+    status: "idle",
+    error: null,
     },
     reducers:{
         likeButtonPressed:(state,action) => {
@@ -31,6 +43,19 @@ export const postSlice = createSlice({
             state.posts[postIndex].likes = state.posts[postIndex].likes + 1;
         },
     },
+    extraReducers:(builder)=>{
+        builder.addCase(fetchPosts.pending,(state)=>{
+            state.status ="loading"
+        })
+        builder.addCase(fetchPosts.fulfilled,(state,action) =>{
+            state.status = "success"
+            state.posts = action.payload.posts
+        })
+        builder.addCase(fetchPosts.rejected,(state,action) =>{
+            state.status ="error"
+            state.error = action.payload.message;
+        })
+    }
 });
 export const {likeButtonPressed} =postSlice.actions;
 export default postSlice.reducer;
